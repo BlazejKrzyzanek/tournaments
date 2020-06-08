@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+        
+    <meta charset="UTF-8">
+
+    <title>Tournaments - Sign Up</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" id="bootstrap-css" rel="stylesheet">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!------ Include the above in your HEAD tag ---------->
+
+    <!--Bootsrap 4 CDN-->
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" rel="stylesheet">
+
+    <!--Fontawesome CDN-->
+    <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/login.css}"/>
+</head>
+<body>
+<div class="container">
+    <div class="d-flex justify-content-center h-100">
+        <div class="card card-high">
+            <div class="card-header">
+                <h3>Sign Up</h3>
+            </div>
+            <div class="card-body">
+                <form action="/user/registration" enctype="utf8" method="POST" th:object="${user}">
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input class="form-control" placeholder="first name" th:field="*{firstName}" type="text">
+                    </div>
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input class="form-control" placeholder="last name" th:field="*{lastName}" type="text">
+                    </div>
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        </div>
+                        <input class="form-control" placeholder="username@mail.com" th:field="*{email}" type="email">
+                    </div>
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input class="form-control" placeholder="password" th:field="*{password}" type="password">
+                    </div>
+                    <div class="input-group form-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input class="form-control" placeholder="matching password" th:field="*{matchingPassword}"
+                               type="password">
+                    </div>
+                    <div class="alert alert-danger" th:if="${#fields.hasAnyErrors()}">
+                            <div th:class="${e.global}? globalerr : fielderr" th:each="e : ${#fields.detailedErrors()}">
+                                <span th:text="${e.global}? '' : ${e.fieldName}">The field name</span>
+                                <span th:text="${e.message}">The error message</span>
+                            </div>
+                    </div>
+                    <div class="alert alert-danger" th:if="${message}" th:text="${message}">
+                        message
+                    </div>
+                    <div class="form-group">
+                        <input class="btn float-right login_btn" type="submit" value="Sign Up">
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-center links">
+                    Already have an account? <a href="/user/login">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
