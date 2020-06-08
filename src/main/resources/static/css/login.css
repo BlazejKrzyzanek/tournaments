@@ -5,6 +5,7 @@ html,body{
     background-size: cover;
     background-repeat: no-repeat;
     height: 100%;
+    overflow: hidden;
     font-family: 'Roboto', sans-serif;
 }
 
@@ -18,6 +19,10 @@ html,body{
     margin-bottom: auto;
     width: 450px;
     background-color: rgba(0,0,0,0.5) !important;
+}
+
+.card-lower{
+    height: 230px;
 }
 
 .card-low{
@@ -38,18 +43,6 @@ html,body{
     background-color: #C26FAC;
     color: black;
     border:0 !important;
-}
-
-.remember{
-    color: white;
-}
-
-.remember input
-{
-    width: 20px;
-    height: 20px;
-    margin-left: 15px;
-    margin-right: 5px;
 }
 
 .login_btn{

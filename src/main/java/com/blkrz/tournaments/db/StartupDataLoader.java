@@ -21,8 +21,9 @@ public class StartupDataLoader implements ApplicationRunner
 
     public void run(ApplicationArguments args)
     {
-        userRepository.save(new User("Franek", "Bolkowski", "asd@dsf.com", "12345"));
-        userRepository.save(new User("Janek", "Jankowski", "mail2131@gmail.com", "12345"));
-        userRepository.save(new User("Alek", "Rurrurur", "pururururur@rurur.com", "12345"));
+        User user = new User("Franek", "Bolkowski", "asd@dsf.com", "12345");
+        user.setEnabled(true);
+
+        userRepository.save(user);
     }
 }

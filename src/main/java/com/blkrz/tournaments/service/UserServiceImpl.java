@@ -1,8 +1,9 @@
 package com.blkrz.tournaments.service;
 
-import com.blkrz.tournaments.data.UserRegistrationDTO;
-import com.blkrz.tournaments.db.model.Token;
+import com.blkrz.tournaments.data.authentication.VerificationTokenTypeEnum;
+import com.blkrz.tournaments.data.dto.UserRegistrationDTO;
 import com.blkrz.tournaments.db.model.User;
+import com.blkrz.tournaments.db.model.VerificationToken;
 import com.blkrz.tournaments.db.repository.TokenRepository;
 import com.blkrz.tournaments.db.repository.UserRepository;
 import com.blkrz.tournaments.exception.UserAlreadyExistException;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+@Transactional
 @Service
 public class UserServiceImpl implements UserService
 {
@@ -51,24 +53,33 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
-    public User getUser(String verificationToken)
+    public User getUser(String verificationToken, VerificationTokenTypeEnum type)
     {
-        return tokenRepository.findByToken(verificationToken).getUser();
+        return tokenRepository.findByTokenAndTypeOrderByExpiryDateDesc(verificationToken, type).getUser();
     }
 
     @Override
-    public Token getVerificationToken(String VerificationToken) {
-        return tokenRepository.findByToken(VerificationToken);
+    public VerificationToken getVerificationToken(String VerificationToken, VerificationTokenTypeEnum type)
+    {
+        return tokenRepository.findByTokenAndTypeOrderByExpiryDateDesc(VerificationToken, type);
     }
 
     @Override
-    public void saveRegisteredUser(User user) {
+    public void saveRegisteredUser(User user)
+    {
         userRepository.save(user);
     }
 
     @Override
-    public void createVerificationToken(User user, String token) {
-        Token myToken = new Token(token, user);
-        tokenRepository.save(myToken);
+    public void createVerificationToken(User user, String token, VerificationTokenTypeEnum tokenType)
+    {
+        VerificationToken myVerificationToken = new VerificationToken(token, user, tokenType);
+        tokenRepository.save(myVerificationToken);
+    }
+
+    @Override
+    public User getUserByEmail(String email)
+    {
+        return userRepository.findByEmail(email);
     }
 }

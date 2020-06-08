@@ -1,5 +1,6 @@
 package com.blkrz.tournaments.db.model;
 
+import com.blkrz.tournaments.data.authentication.VerificationTokenTypeEnum;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,7 +10,7 @@ import java.util.Calendar;
 
 @Data
 @Entity
-public class Token
+public class VerificationToken
 {
     private static final int EXPIRATION = 60 * 24;
 
@@ -25,10 +26,18 @@ public class Token
 
     private Date expiryDate;
 
-    public Token(String token, User user)
+    @Enumerated(value = EnumType.STRING)
+    private VerificationTokenTypeEnum type;
+
+    public VerificationToken()
+    {
+    }
+
+    public VerificationToken(String token, User user, VerificationTokenTypeEnum type)
     {
         this.token = token;
         this.user = user;
+        this.type = type;
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 

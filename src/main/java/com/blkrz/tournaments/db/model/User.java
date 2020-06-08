@@ -43,7 +43,7 @@ public class User
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.enabled = true;
+        this.enabled = false;
         this.password = encodePassword(password);
         this.role = "ROLE_USER";
     }
