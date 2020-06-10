@@ -1,0 +1,96 @@
+html, body {
+    background-image: url('/images/background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 100%;
+    overflow: auto;
+    font-family: 'Roboto', sans-serif;
+}
+
+@media (max-width: 768px) {
+    .custom-image {
+        display: none;
+    }
+}
+
+.custom-image {
+    max-width: 80px;
+}
+
+.card-body h5 {
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.category-image {
+    width: 30px;
+    height: 30px;
+}
+
+.card-row {
+    height: 120px;
+    margin-top: 8px;
+}
+
+.card:hover {
+    height: 120px;
+    margin-top: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+}
+
+.toolbar {
+    margin: 0;
+    padding: 0;
+}
+
+.search-bar {
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 0.25rem;
+    background-color: transparent;
+}
+
+.search-bar span {
+    background-color: #C26FAC;
+}
+
+.search-bar input {
+    background-color: transparent;
+}
+
+.search-bar input:focus, .form-control:focus {
+    outline: none;
+    border: none;
+    box-shadow: 0 0 0 0.1rem #C26FAC;
+    background-color: transparent;
+}
+
+.organise-btn {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+}
+
+.organise-btn:hover {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 100%;
+}
+
+.organise-btn:focus {
+    outline: none;
+    border: none;
+    color: white;
+    box-shadow: 0 0 0 0.1rem #C26FAC;
+}
+
+.footer {
+    position: relative;
+    bottom: 6px;
+    font-size: 10px;
+    height: 24px;
+    margin: 16px 0 0;
+    justify-content: center;
+    align-items: end;
+}

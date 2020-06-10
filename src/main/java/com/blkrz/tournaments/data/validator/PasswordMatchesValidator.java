@@ -1,13 +1,11 @@
 package com.blkrz.tournaments.data.validator;
 
-import com.blkrz.tournaments.data.dto.DTOWithPassword;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.time.LocalDateTime;
 
 public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, Object>
 {
-
     @Override
     public void initialize(PasswordMatches constraintAnnotation)
     {
@@ -16,10 +14,10 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
     @Override
     public boolean isValid(Object obj, ConstraintValidatorContext context)
     {
-        if (obj instanceof DTOWithPassword)
+        if (obj instanceof LocalDateTime)
         {
-            DTOWithPassword user = (DTOWithPassword) obj;
-            return user.getPassword().equals(user.getMatchingPassword());
+            LocalDateTime localDateTime = (LocalDateTime) obj;
+            return localDateTime.isAfter(LocalDateTime.now());
         }
 
         return false;

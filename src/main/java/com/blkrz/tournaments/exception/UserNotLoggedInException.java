@@ -3,10 +3,10 @@ package com.blkrz.tournaments.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class UserAlreadyExistException extends Exception
+@ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+public class UserNotLoggedInException extends Exception
 {
-    public UserAlreadyExistException(String message)
+    public UserNotLoggedInException(String message)
     {
         super(message);
     }

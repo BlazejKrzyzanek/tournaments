@@ -4,19 +4,113 @@ import com.blkrz.tournaments.data.authentication.VerificationTokenTypeEnum;
 import com.blkrz.tournaments.data.dto.UserRegistrationDTO;
 import com.blkrz.tournaments.db.model.User;
 import com.blkrz.tournaments.db.model.VerificationToken;
+import com.blkrz.tournaments.db.repository.TokenRepository;
+import com.blkrz.tournaments.db.repository.UserRepository;
 import com.blkrz.tournaments.exception.UserAlreadyExistException;
+import com.blkrz.tournaments.exception.UserNotLoggedInException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
-public interface UserService
+import javax.transaction.Transactional;
+
+@Transactional
+@Service
+public class UserService
 {
-    User registerNewUserAccount(UserRegistrationDTO userRegistrationDTO) throws UserAlreadyExistException;
+    private static final Logger logger = LogManager.getLogger(UserService.class);
 
-    User getUser(String verificationToken, VerificationTokenTypeEnum type);
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
-    VerificationToken getVerificationToken(String VerificationToken, VerificationTokenTypeEnum type);
+    @Autowired
+    public UserService(UserRepository userRepository, TokenRepository tokenRepository)
+    {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
+    }
 
-    void saveRegisteredUser(User user);
+    public User registerUser(UserRegistrationDTO userRegistrationDTO) throws UserAlreadyExistException
+    {
+        if (emailExists(userRegistrationDTO.getEmail()))
+        {
+            throw new UserAlreadyExistException(
+                    String.format("User with this email already exists: %s", userRegistrationDTO.getEmail()));
+        }
 
-    void createVerificationToken(User user, String token, VerificationTokenTypeEnum tokenType);
+        User user = new User();
+        user.setFirstName(userRegistrationDTO.getFirstName());
+        user.setLastName(userRegistrationDTO.getLastName());
+        user.setEmail(userRegistrationDTO.getEmail());
+        user.setEnabled(false);
+        user.setRole("ROLE_USER");
+        user.setPassword(userRegistrationDTO.getPassword());
 
-    User getUserByEmail(String email);
+        User save = userRepository.save(user);
+
+        logger.log(Level.DEBUG, "User " + user.getEmail() + " registered successfully.");
+        return save;
+    }
+
+    private boolean emailExists(String email)
+    {
+        return userRepository.findByEmail(email) != null;
+    }
+
+    public User getUser(String verificationToken, VerificationTokenTypeEnum type)
+    {
+        return tokenRepository.findByTokenAndTypeOrderByExpiryDateDesc(verificationToken, type).getUser();
+    }
+
+    public VerificationToken getVerificationToken(String VerificationToken, VerificationTokenTypeEnum type)
+    {
+        return tokenRepository.findByTokenAndTypeOrderByExpiryDateDesc(VerificationToken, type);
+    }
+
+    public void saveUser(User user)
+    {
+        userRepository.save(user);
+    }
+
+    public void createVerificationToken(User user, String token, VerificationTokenTypeEnum tokenType)
+    {
+        VerificationToken myVerificationToken = new VerificationToken(token, user, tokenType);
+        tokenRepository.save(myVerificationToken);
+    }
+
+    public boolean isUserLogged()
+    {
+        try
+        {
+            getLoggedInUser();
+            return true;
+        }
+        catch (UserNotLoggedInException e)
+        {
+            return false;
+        }
+    }
+
+    public User getLoggedInUser() throws UserNotLoggedInException
+    {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails)
+        {
+            String email = ((UserDetails) principal).getUsername();
+            return getUserByEmail(email);
+        }
+        else
+        {
+            throw new UserNotLoggedInException("Can't get user from session.");
+        }
+    }
+
+    public User getUserByEmail(String email)
+    {
+        return userRepository.findByEmail(email);
+    }
 }

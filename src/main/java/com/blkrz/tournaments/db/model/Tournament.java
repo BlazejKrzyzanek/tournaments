@@ -1,6 +1,7 @@
 package com.blkrz.tournaments.db.model;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -15,9 +16,14 @@ public class Tournament
     @GeneratedValue
     private Integer id;
     @NotNull
+    @Length(min = 3, max = 50)
     private String name;
     @NotNull
-    private String discipline;
+    @ManyToOne
+    @JoinColumn(name = "discipline_id")
+    private Discipline discipline;
+    @NotNull
+    @Length(max = 2048)
     private String description;
     @NotNull
     @ManyToOne
@@ -25,6 +31,8 @@ public class Tournament
     private User organiser;
     private Double latitude;
     private Double longitude;
+    @NotNull
+    private Boolean online;
     @NotNull
     private Integer entryLimit;
     @NotNull

@@ -8,7 +8,7 @@ import com.blkrz.tournaments.data.dto.UserRegistrationDTO;
 import com.blkrz.tournaments.db.model.User;
 import com.blkrz.tournaments.db.model.VerificationToken;
 import com.blkrz.tournaments.exception.UserAlreadyExistException;
-import com.blkrz.tournaments.service.UserServiceImpl;
+import com.blkrz.tournaments.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +31,13 @@ import static com.blkrz.tournaments.data.authentication.VerificationTokenTypeEnu
 @Controller
 public class LoginController
 {
-    private static final Logger log = LogManager.getLogger(LoginController.class);
+    private static final Logger logger = LogManager.getLogger(LoginController.class);
 
     private final ApplicationEventPublisher eventPublisher;
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @Autowired
-    public LoginController(UserServiceImpl userService, ApplicationEventPublisher eventPublisher)
+    public LoginController(UserService userService, ApplicationEventPublisher eventPublisher)
     {
         this.userService = userService;
         this.eventPublisher = eventPublisher;
@@ -58,7 +58,7 @@ public class LoginController
         {
             try
             {
-                User user = userService.registerNewUserAccount(userDTO);
+                User user = userService.registerUser(userDTO);
 
                 String appUrl = request.getContextPath();
                 eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, appUrl));
@@ -98,7 +98,7 @@ public class LoginController
         }
 
         user.setEnabled(true);
-        userService.saveRegisteredUser(user);
+        userService.saveUser(user);
         return "redirect:/user/login?verified";
     }
 
@@ -174,7 +174,7 @@ public class LoginController
             if (user.getEmail().equals(resetPasswordDTO.getEmail()))
             {
                 user.setPassword(resetPasswordDTO.getPassword());
-                userService.saveRegisteredUser(user);
+                userService.saveUser(user);
 
                 mav = new ModelAndView("login");
                 mav.addObject("successMessage", "Your password has been updated!");

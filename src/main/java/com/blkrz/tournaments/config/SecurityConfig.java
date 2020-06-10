@@ -54,6 +54,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                         "/user/forgot-password*",
                         "/user/reset-password*",
                         "/user/verification",
+                        "/tournaments/view*",
+                        "/tournaments/",
+                        "/",
+                        "/images*",
                         "/css/**", "/js/**", "/images/**")
                 .permitAll()
                 .and()
@@ -66,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .permitAll()
                 .usernameParameter("email")
                 .failureUrl("/user/login?error")
-                .defaultSuccessUrl("/index", true)
+                .defaultSuccessUrl("/tournaments/view", true)
                 .and()
                 .logout()
                 .logoutUrl("/user/logout")

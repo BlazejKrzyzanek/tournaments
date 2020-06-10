@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Error!</title>
+
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" id="bootstrap-css" rel="stylesheet">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/mainStyles.css}"/>
+    <link rel="stylesheet" th:href="@{/css/tournamentStyles.css}"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+    <div class="d-flex flex-grow-1">
+        <a class="navbar-brand" href="#">
+            Tournaments
+        </a>
+    </div>
+    <div class="flex-grow-1 text-right" id="myNavbar">
+        <div class="navbar-nav ml-auto flex-nowrap text-right flex-row-reverse">
+            <a class="nav-link active" href="/user/login" th:if="${!isUserLogged}">Login</a>
+            <a class="nav-item nav-link active" href="/user/logout" th:if="${isUserLogged}">Logout</a>
+
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="toolbar col-lg-9 col-sm-12">
+            <div class="row">
+                <div class="col">
+                    <a class="btn organise-btn" href="/tournaments/organise">Organise tournament</a>
+                </div>
+                <div class="col-sm-8">
+                    <div class="search-bar">
+                        <form>
+                            <div class="input-group md-form form-sm form-1 pl-0">
+                                <input aria-label="Search" class="form-control my-0 py-1" name="search"
+                                       placeholder="Search" type="text">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-row col-lg-9 col-sm-12" th:each="tournament: ${tournaments}">
+            <div class="card-body row">
+                <div class="col-md-2">
+                    <img class="custom-image" th:src="@{${'~/images/disciplines/' + tournament.discipline}}">
+                </div>
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="row">
+                                <h5 th:text="${tournament.name}"></h5>
+                            </div>
+                            <div class="row">
+                                <span th:text="${'Entry limit: ' + tournament.entryLimit}"></span>
+                            </div>
+                            <div class="row">
+                                <span th:text="${'Deadline: ' + #temporals.format(tournament.deadline, 'dd-MM-yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="row justify-content-end">
+                                <img class="category-image" th:alt="${tournament.discipline}"
+                                     th:src="@{${'~/images/disciplines/' + tournament.discipline}}"
+                                     th:tooltip="${tournament.discipline}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <footer class="footer">
+            <div class="text-muted">App created by Błażej Krzyżanek.</div>
+            <div class="text-muted">Icons made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+        </footer>
+    </div>
+</div>
+</body>
+</html>
