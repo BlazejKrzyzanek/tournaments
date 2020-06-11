@@ -86,7 +86,7 @@ public class UserService
     {
         try
         {
-            getLoggedInUser();
+            getLoggedInUserEmail();
             return true;
         }
         catch (UserNotLoggedInException e)
@@ -95,18 +95,22 @@ public class UserService
         }
     }
 
-    public User getLoggedInUser() throws UserNotLoggedInException
+    public String getLoggedInUserEmail() throws UserNotLoggedInException
     {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails)
         {
-            String email = ((UserDetails) principal).getUsername();
-            return getUserByEmail(email);
+            return ((UserDetails) principal).getUsername();
         }
         else
         {
             throw new UserNotLoggedInException("Can't get user from session.");
         }
+    }
+
+    public User getLoggedInUser() throws UserNotLoggedInException
+    {
+        return getUserByEmail(getLoggedInUserEmail());
     }
 
     public User getUserByEmail(String email)

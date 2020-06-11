@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent" th:fragment="navbar">
+    <div class="d-flex flex-grow-1">
+        <a class="navbar-brand" href="/tournaments/view">
+            Tournaments
+        </a>
+    </div>
+    <div class="flex-grow-1 text-right" id="myNavbar">
+        <div class="navbar-nav ml-auto flex-nowrap text-right flex-row-reverse">
+            <a class="nav-item nav-link active" href="/user/login" th:if="${!isUserLogged}">Login</a>
+            <a class="nav-item nav-link active" href="/user/logout" th:if="${isUserLogged}">Logout</a>
+            <a class="nav-item nav-link active" href="/tournaments/my" th:if="${isUserLogged}">My</a>
+            <a class="nav-item nav-link active" href="/tournaments/organised-by-me" th:if="${isUserLogged}">Organised</a>
+            <a class="nav-item nav-link active" href="/tournaments/view">All</a>
+        </div>
+    </div>
+</nav>

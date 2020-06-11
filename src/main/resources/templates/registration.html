@@ -62,7 +62,6 @@
                     </div>
                     <div class="alert alert-danger" th:if="${#fields.hasAnyErrors()}">
                             <div th:class="${e.global}? globalerr : fielderr" th:each="e : ${#fields.detailedErrors()}">
-                                <span th:text="${e.global}? '' : ${e.fieldName}">The field name</span>
                                 <span th:text="${e.message}">The error message</span>
                             </div>
                     </div>

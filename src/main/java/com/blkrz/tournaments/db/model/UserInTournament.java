@@ -9,13 +9,15 @@ import javax.validation.constraints.NotNull;
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"tournament_id", "rank"}),
-                @UniqueConstraint(columnNames = {"tournament_id", "user_id"})
+                @UniqueConstraint(columnNames = {"tournament_id", "user_id"}),
+                @UniqueConstraint(columnNames = {"rank", "licenceCode"})
         }
 )
 @Entity
 public class UserInTournament
 {
     @Id
+    @GeneratedValue
     private Integer id;
     @NotNull
     @ManyToOne
@@ -26,7 +28,6 @@ public class UserInTournament
     @JoinColumn(name = "user_id")
     private User user;
     @NotNull
-    @Column(unique = true)
     private String licenceCode;
     @NotNull
     private Integer rank;

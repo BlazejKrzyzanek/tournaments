@@ -22,17 +22,16 @@ public class Tournament
     @ManyToOne
     @JoinColumn(name = "discipline_id")
     private Discipline discipline;
-    @NotNull
     @Length(max = 2048)
     private String description;
     @NotNull
     @ManyToOne
     @JoinColumn(name = "organiser_id")
     private User organiser;
-    private Double latitude;
-    private Double longitude;
     @NotNull
-    private Boolean online;
+    private Double latitude;
+    @NotNull
+    private Double longitude;
     @NotNull
     private Integer entryLimit;
     @NotNull

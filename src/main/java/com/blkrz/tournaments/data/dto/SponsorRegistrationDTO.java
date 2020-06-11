@@ -1,29 +1,25 @@
 package com.blkrz.tournaments.data.dto;
 
-import com.blkrz.tournaments.db.model.Discipline;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
-public class DisciplineDTO
+@NoArgsConstructor
+public class SponsorRegistrationDTO
 {
     @NotNull
     @NotEmpty
     @Length(min = 3, max = 24)
     private String name;
+    private MultipartFile logo;
 
-    @NotNull
-    @NotEmpty
-    private String imagePath;
+    private String directoryPath;
 
-    public DisciplineDTO(Discipline discipline)
-    {
-        name = discipline.getName();
-        imagePath = discipline.getImagePath();
-    }
 }

@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                         "/user/reset-password*",
                         "/user/verification",
                         "/tournaments/view*",
+                        "/tournaments/view/*",
                         "/tournaments/",
                         "/",
                         "/images*",

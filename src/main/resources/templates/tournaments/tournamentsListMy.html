@@ -29,15 +29,8 @@
                     <div class="search-bar">
                         <form>
                             <div class="input-group md-form form-sm form-1 pl-0">
-                                <select class="col-sm-4 form-control my-0 transparent remove-outline" name="discipline">
-                                    <option value="">All</option>
-                                    <option th:each="discipline : ${disciplines}" th:selected="${discipline.name.equalsIgnoreCase(param.discipline)}"
-                                            th:text="${discipline.name}"
-                                            th:value="${discipline.name}"></option>
-                                </select>
-                                <input aria-label="Search" class="form-control my-0 transparent remove-outline" name="search"
-                                       placeholder="Search" th:value="${param.search != null ? param.search : ''}"
-                                       type="text">
+                                <input aria-label="Search" class="form-control my-0 transparent" name="search"
+                                       placeholder="Search" th:value="${param.search != null ? param.search : ''}" type="text">
                             </div>
                         </form>
                     </div>

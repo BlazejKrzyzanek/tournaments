@@ -30,10 +30,15 @@ public class FileService
         if (!new File(pathToUploadsDirectory).exists())
         {
             logger.log(Level.DEBUG, "Directory " + pathToUploadsDirectory + " doesn't exist, creating one.");
-            boolean isDirectoryCreated = new File(pathToUploadsDirectory).mkdir();
-            if (!isDirectoryCreated)
+            Path directory;
+            try
             {
-                throw new TournamentsFileException("Can't create directory to upload files.");
+                directory = Files.createDirectories(Paths.get(pathToUploadsDirectory));
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                throw new TournamentsFileException("Can't create directory to upload files.", e);
             }
         }
 
@@ -41,7 +46,7 @@ public class FileService
         {
             String orgName = file.getOriginalFilename();
             String filePath = pathToUploadsDirectory + orgName;
-            File dest = new File(filePath);
+            Path dest = Files.createFile(Path.of(filePath));
             file.transferTo(dest);
 
             logger.log(Level.INFO, "Saved file " + filePath);

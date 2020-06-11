@@ -6,6 +6,7 @@ import com.blkrz.tournaments.data.dto.TournamentRegistrationDTO;
 import com.blkrz.tournaments.db.model.User;
 import com.blkrz.tournaments.exception.DisciplineDoesntExistException;
 import com.blkrz.tournaments.exception.SponsorDoesntExistException;
+import com.blkrz.tournaments.exception.TournamentsFileException;
 import com.blkrz.tournaments.service.TournamentService;
 import com.blkrz.tournaments.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,19 @@ public class StartupDataLoader implements ApplicationRunner
         this.tournamentService = tournamentService;
     }
 
-    public void run(ApplicationArguments args) throws SponsorDoesntExistException, DisciplineDoesntExistException
+    public void run(ApplicationArguments args) throws SponsorDoesntExistException, DisciplineDoesntExistException, TournamentsFileException
     {
         User user = new User("Franek", "Bolkowski", "asd@dsf.com", "12345");
+        user.setEnabled(true);
+
+        userService.saveUser(user);
+
+        user = new User("Janek", "Bolkowski", "test@a.com", "12345");
+        user.setEnabled(true);
+
+        userService.saveUser(user);
+
+        user = new User("Janek", "Bolkowski", "test@b.com", "12345");
         user.setEnabled(true);
 
         userService.saveUser(user);
@@ -47,18 +58,18 @@ public class StartupDataLoader implements ApplicationRunner
 
         TournamentRegistrationDTO tournamentRegistrationDTO = new TournamentRegistrationDTO();
         tournamentRegistrationDTO.setName("Basketball NBA contest");
-        tournamentRegistrationDTO.setDeadline(LocalDateTime.now().plusDays(6));
+        tournamentRegistrationDTO.setDeadlineAsLocalDateTime(LocalDateTime.now().plusDays(6));
         tournamentRegistrationDTO.setDescription("Short description of this tournament goes here!");
-        tournamentRegistrationDTO.setOnline(true);
         tournamentRegistrationDTO.setEntryLimit(7);
+        tournamentRegistrationDTO.setLatitude(50.484420);
+        tournamentRegistrationDTO.setLongitude(20.180743);
         tournamentRegistrationDTO.setDiscipline("Basketball");
-        tournamentRegistrationDTO.setSponsors(List.of("CocaCola", "Pepsi"));
+        tournamentRegistrationDTO.setSponsors(List.of("CocaCola"));
         tournamentService.registerTournament(tournamentRegistrationDTO, user);
 
         tournamentRegistrationDTO.setName("Boxing and kickboxing.");
-        tournamentRegistrationDTO.setDeadline(LocalDateTime.now().plusDays(12));
+        tournamentRegistrationDTO.setDeadlineAsLocalDateTime(LocalDateTime.now().plusDays(12));
         tournamentRegistrationDTO.setDescription("Sed placerat felis nec velit laoreet euismod. Vivamus mattis ipsum sit amet elit posuere, quis euismod augue mollis. Pellentesque varius quam vitae eleifend posuere. Mauris ornare mauris sit amet iaculis tincidunt. Nulla porttitor arcu vitae facilisis suscipit. Donec elit tortor, elementum non velit nec, scelerisque tristique magna. !");
-        tournamentRegistrationDTO.setOnline(false);
         tournamentRegistrationDTO.setLatitude(51.556831);
         tournamentRegistrationDTO.setLongitude(17.054894);
         tournamentRegistrationDTO.setEntryLimit(2);
@@ -66,9 +77,8 @@ public class StartupDataLoader implements ApplicationRunner
         tournamentService.registerTournament(tournamentRegistrationDTO, user);
 
         tournamentRegistrationDTO.setName("It all depends on LUCK...");
-        tournamentRegistrationDTO.setDeadline(LocalDateTime.now().plusDays(30));
+        tournamentRegistrationDTO.setDeadlineAsLocalDateTime(LocalDateTime.now().plusDays(30));
         tournamentRegistrationDTO.setDescription("Proin eget massa et felis dignissim egestas. Sed ullamcorper tempus nibh quis ultrices. Nulla ut tincidunt magna. Donec ullamcorper lacinia risus, in ornare tellus ornare nec. Ut lorem lectus, posuere et justo et, euismod semper neque. ");
-        tournamentRegistrationDTO.setOnline(false);
         tournamentRegistrationDTO.setLatitude(50.484420);
         tournamentRegistrationDTO.setLongitude(20.180743);
         tournamentRegistrationDTO.setEntryLimit(8);
@@ -76,9 +86,8 @@ public class StartupDataLoader implements ApplicationRunner
         tournamentService.registerTournament(tournamentRegistrationDTO, user);
 
         tournamentRegistrationDTO.setName("Roving marks");
-        tournamentRegistrationDTO.setDeadline(LocalDateTime.now().plusDays(2));
+        tournamentRegistrationDTO.setDeadlineAsLocalDateTime(LocalDateTime.now().plusDays(2));
         tournamentRegistrationDTO.setDescription("Maecenas quis pharetra leo. Vestibulum vehicula vulputate tortor vel finibus. Donec nec mauris ut tellus tempus molestie eget vitae justo. ");
-        tournamentRegistrationDTO.setOnline(false);
         tournamentRegistrationDTO.setLatitude(-7.572652);
         tournamentRegistrationDTO.setLongitude(110.823447);
         tournamentRegistrationDTO.setEntryLimit(64);

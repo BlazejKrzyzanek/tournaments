@@ -10,14 +10,14 @@ html, body {
 }
 
 * {
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
 }
 
 img {
     max-width: 100%;
     height: auto;
-    width: auto\9; /* ie8 */
+    width: auto \9; /* ie8 */
 }
 
 .container {
@@ -31,12 +31,16 @@ img {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-.card-header h3 {
+h3 {
     color: white;
+    text-transform: uppercase;
+    letter-spacing: 3px;
 }
 
-.card-header h5 {
+h5 {
     color: white;
+    text-transform: uppercase;
+    letter-spacing: 3px;
 }
 
 a {
@@ -47,4 +51,69 @@ a {
 a:hover {
     color: #C26FAC;
     text-decoration: none;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.1rem #C26FAC;
+    border-color: transparent;
+}
+
+input:focus {
+    box-shadow: 0 0 0 0.1rem #C26FAC;
+}
+
+textarea {
+    min-height: 40px;
+}
+
+.input-group-prepend span {
+    width: 40px;
+    background-color: #C26FAC;
+    color: black;
+    border: 0 !important;
+}
+
+.login_btn {
+    color: black;
+    background-color: #C26FAC;
+    width: 100px;
+}
+
+.login_btn:hover {
+    color: black;
+    background-color: white;
+}
+
+body.modal-open #wrap {
+    -webkit-filter: blur(7px);
+    -moz-filter: blur(15px);
+    -o-filter: blur(15px);
+    -ms-filter: blur(15px);
+    filter: blur(15px);
+}
+
+.modal-backdrop {
+    background: #f7f7f7;
+}
+
+.close {
+    display: block;
+}
+
+.center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.navbar-nav .nav-link {
+     padding-right: 4px;
+     padding-left: 4px;
+}
+
+.nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
