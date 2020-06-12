@@ -11,6 +11,8 @@ import com.blkrz.tournaments.db.model.UserInTournament;
 import com.blkrz.tournaments.exception.*;
 import com.blkrz.tournaments.service.TournamentService;
 import com.blkrz.tournaments.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -27,6 +29,8 @@ import java.util.stream.IntStream;
 @Controller
 public class TournamentsController
 {
+    private static final Logger logger = LogManager.getLogger(TournamentsController.class);
+
     private final TournamentService tournamentService;
     private final UserService userService;
 
@@ -85,11 +89,11 @@ public class TournamentsController
 
     @GetMapping("/tournaments/organised-by-me")
     public String showMyOrganisedTournaments(Model model,
-                                    @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                    @RequestParam(name = "pageEntries", required = false, defaultValue = "10") Integer pageEntries,
-                                    @RequestParam(name = "search", required = false) String search,
-                                    @RequestParam(name = "discipline", required = false) String discipline,
-                                    @RequestParam(name = "sorting", required = false) String sortOrder) throws UserNotLoggedInException
+                                             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                             @RequestParam(name = "pageEntries", required = false, defaultValue = "10") Integer pageEntries,
+                                             @RequestParam(name = "search", required = false) String search,
+                                             @RequestParam(name = "discipline", required = false) String discipline,
+                                             @RequestParam(name = "sorting", required = false) String sortOrder) throws UserNotLoggedInException
     {
         Page<SimpleTournamentDTO> tournaments = tournamentService.getTournamentsByOrganiser(userService.getLoggedInUser(), page, pageEntries, search, discipline);
         return showTournaments(model, page, tournaments);
@@ -154,6 +158,8 @@ public class TournamentsController
             viewDTO.setIsUserOrganiser(viewDTO.getOrganiserEmail().equals(user.getEmail()));
             viewDTO.setIsUserRegistered(tournamentService.isUserRegisteredOnTournament(user, tournamentName));
             model.addAttribute("isUserLogged", true);
+            model.addAttribute("currentUserDuel", tournamentService.getDuelByUserAndTournament(user, tournamentName));
+
         }
         catch (UserNotLoggedInException e)
         {
@@ -163,6 +169,7 @@ public class TournamentsController
         }
 
         model.addAttribute("view", viewDTO);
+        model.addAttribute("rounds", tournamentService.getEliminationRoundsOfTournament(tournamentName));
 
         return "tournaments/tournamentsView";
     }
@@ -226,5 +233,19 @@ public class TournamentsController
         redirectAttributes.addFlashAttribute("tournamentRegistration", registrationDTO);
         redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.tournamentRegistration", bindingResult);
         return "redirect:/tournaments/organise";
+    }
+
+    @PostMapping("/tournaments/update/{tournamentName}")
+    public String saveDuelResult(@PathVariable String tournamentName,
+                                 @ModelAttribute("winner") Integer winnerId,
+                                 BindingResult bindingResult,
+                                 RedirectAttributes redirectAttributes) throws SponsorDoesntExistException
+    {
+
+        logger.info(tournamentName + " won " + winnerId);
+
+        tournamentService.saveWinnerOfDuel(tournamentName, userService.getUserById(winnerId));
+
+        return "redirect:/tournaments/view/" + tournamentName;
     }
 }

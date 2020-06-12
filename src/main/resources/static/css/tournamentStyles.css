@@ -116,7 +116,7 @@ html, body {
 
 #map {
     width: 100%;
-    height: 200px;
+    height: 400px;
     margin-bottom: 16px;
     padding: 0;
     border-radius: 8px;
@@ -138,6 +138,7 @@ html, body {
     margin-left: 4px;
     width: 50px;
     height: 50px;
+    object-fit: contain;
 }
 
 .tournament-details {

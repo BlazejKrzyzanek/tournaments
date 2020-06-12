@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface UserInTournamentRepository extends JpaRepository<UserInTournament, Integer>
 {
-    List<UserInTournament> findAllByTournament(Tournament tournament);
+    List<UserInTournament> findAllByTournamentOrderByRank(Tournament tournament);
     List<UserInTournament> findAllByUser(User tournament);
     UserInTournament getByUserAndTournament(User user, Tournament tournament);
 }

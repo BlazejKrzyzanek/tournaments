@@ -8,6 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Repository
 public interface TournamentRepository extends JpaRepository<Tournament, Integer>
 {
@@ -28,4 +31,6 @@ public interface TournamentRepository extends JpaRepository<Tournament, Integer>
     Page<Tournament> findByOrganiserAndNameContainingIgnoreCaseAndDisciplineOrderByName(User organiser, String name, Discipline discipline, Pageable pageable);
 
     Page<Tournament> findByOrganiserAndNameContainingIgnoreCaseOrderByName(User organiser, String search, Pageable pageable);
+
+    List<Tournament> findAllByEliminationIsNullAndDeadlineBetween(LocalDateTime from, LocalDateTime to);
 }

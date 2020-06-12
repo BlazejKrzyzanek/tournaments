@@ -3,25 +3,23 @@ package com.blkrz.tournaments.service;
 import com.blkrz.tournaments.data.TournamentSortingTypeEnum;
 import com.blkrz.tournaments.data.dto.*;
 import com.blkrz.tournaments.db.model.*;
-import com.blkrz.tournaments.db.repository.DisciplineRepository;
-import com.blkrz.tournaments.db.repository.SponsorRepository;
-import com.blkrz.tournaments.db.repository.TournamentRepository;
-import com.blkrz.tournaments.db.repository.UserInTournamentRepository;
+import com.blkrz.tournaments.db.repository.*;
 import com.blkrz.tournaments.exception.DisciplineDoesntExistException;
 import com.blkrz.tournaments.exception.SponsorDoesntExistException;
 import com.blkrz.tournaments.exception.TooManyUsersRegisteredToTournament;
 import com.blkrz.tournaments.exception.TournamentsFileException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,20 +27,28 @@ import java.util.stream.Stream;
 @Service
 public class TournamentService
 {
+    private static final Logger logger = LogManager.getLogger(TournamentService.class);
+
     private final TournamentRepository tournamentRepository;
     private final DisciplineRepository disciplineRepository;
     private final SponsorRepository sponsorRepository;
     private final UserInTournamentRepository userInTournamentRepository;
     private final FileService fileService;
+    private final EliminationRepository eliminationRepository;
+    private final RoundRepository roundRepository;
+    private final DuelRepository duelRepository;
 
     @Autowired
-    public TournamentService(TournamentRepository tournamentRepository, DisciplineRepository disciplineRepository, SponsorRepository sponsorRepository, UserInTournamentRepository userInTournamentRepository, FileService fileService)
+    public TournamentService(TournamentRepository tournamentRepository, DisciplineRepository disciplineRepository, SponsorRepository sponsorRepository, UserInTournamentRepository userInTournamentRepository, FileService fileService, EliminationRepository eliminationRepository, RoundRepository roundRepository, DuelRepository duelRepository)
     {
         this.tournamentRepository = tournamentRepository;
         this.disciplineRepository = disciplineRepository;
         this.sponsorRepository = sponsorRepository;
         this.userInTournamentRepository = userInTournamentRepository;
         this.fileService = fileService;
+        this.eliminationRepository = eliminationRepository;
+        this.roundRepository = roundRepository;
+        this.duelRepository = duelRepository;
     }
 
     public void saveTournament(Tournament tournament)
@@ -176,7 +182,7 @@ public class TournamentService
     public TournamentViewDTO getTournamentViewByName(String tournamentName)
     {
         Tournament tournament = tournamentRepository.findByName(tournamentName);
-        List<UserInTournament> classification = userInTournamentRepository.findAllByTournament(tournament);
+        List<UserInTournament> classification = userInTournamentRepository.findAllByTournamentOrderByRank(tournament);
         TournamentViewDTO viewDTO = new TournamentViewDTO();
         viewDTO.setName(tournament.getName());
         viewDTO.setDescription(tournament.getDescription() != null ? tournament.getDescription() : "");
@@ -193,7 +199,6 @@ public class TournamentService
         viewDTO.setLongitude(tournament.getLongitude());
         viewDTO.setOrganiserEmail(tournament.getOrganiser().getEmail());
 
-        classification.sort(Comparator.comparingInt(UserInTournament::getRank));
         viewDTO.setClassification(classification.stream().map(ClassificationDTO::new).collect(Collectors.toList()));
 
         return viewDTO;
@@ -203,7 +208,7 @@ public class TournamentService
     {
         Tournament tournament = tournamentRepository.findByName(tournamentName);
 
-        if (userInTournamentRepository.findAllByTournament(tournament).size() < tournament.getEntryLimit())
+        if (userInTournamentRepository.findAllByTournamentOrderByRank(tournament).size() < tournament.getEntryLimit())
         {
             UserInTournament userInTournament = new UserInTournament();
             userInTournament.setUser(user);
@@ -383,5 +388,204 @@ public class TournamentService
                 .findByOrganiserAndNameContainingIgnoreCaseOrderByName(
                         organiser, search, PageRequest.of(page, pageEntries))
                 .map(SimpleTournamentDTO::new);
+    }
+
+    public List<RoundDTO> getEliminationRoundsOfTournament(String tournamentName)
+    {
+        Elimination elimination = eliminationRepository.findByTournament(tournamentRepository.findByName(tournamentName));
+        if (elimination != null)
+        {
+            List<Round> rounds = elimination.getRounds();
+
+            return rounds.stream().map(round -> {
+                RoundDTO roundDTO = new RoundDTO();
+                roundDTO.setNumber(round.getRoundNumber());
+                roundDTO.setDuels(round.getDuels().stream().map(duel ->
+                {
+                    DuelDTO duelDTO = new DuelDTO(duel);
+                    return duelDTO;
+                })
+                        .collect(Collectors.toList()));
+                return roundDTO;
+            }).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    /** Check for finished registration every 3 minutes. */
+    @Scheduled(fixedDelay = 180000)
+    public void calculateElimination()
+    {
+        logger.info("Tournament elimination calculation START.");
+
+        List<Elimination> eliminationsToAdd = new ArrayList<>();
+        List<Duel> duelsToAdd = new ArrayList<>();
+        List<Round> roundsToAdd = new ArrayList<>();
+        List<Tournament> tournamentsToAdd = new ArrayList<>();
+
+        List<Tournament> tournamentsToCalculate = tournamentRepository.findAllByEliminationIsNullAndDeadlineBetween(LocalDateTime.now().minusMinutes(20), LocalDateTime.now());
+        for (Tournament tournament : tournamentsToCalculate)
+        {
+            Elimination elimination = new Elimination();
+            elimination.setTournament(tournament);
+
+            eliminationsToAdd.add(elimination);
+
+            Deque<User> allUsersInTournament = userInTournamentRepository
+                    .findAllByTournamentOrderByRank(tournament)
+                    .stream().map(UserInTournament::getUser)
+                    .collect(Collectors.toCollection(ArrayDeque::new));
+
+            int howManyVirtual = 0;
+            // Adding virtual user to have proper count of users
+            while (!isPowerOfTwo(allUsersInTournament.size() + howManyVirtual))
+            {
+                howManyVirtual++;
+            }
+
+            int initialRoundSize = (allUsersInTournament.size() + howManyVirtual) / 2;
+
+            logger.info("How many virtual users: " + howManyVirtual);
+            logger.info("Initial round size: " + initialRoundSize);
+
+            Round round1 = new Round();
+            round1.setElimination(elimination);
+            round1.setRoundNumber(0);
+
+            roundsToAdd.add(round1);
+
+            int duelNo = 0;
+            while (allUsersInTournament.size() + howManyVirtual > 0)
+            {
+                Duel duel = new Duel();
+                duel.setRound(round1);
+                duel.setNumber(duelNo++);
+                duel.setFirst(allUsersInTournament.pollFirst());
+                if (howManyVirtual > 0)
+                {
+                    duel.setSecond(null);
+                    howManyVirtual--;
+                }
+                else
+                {
+                    duel.setSecond(allUsersInTournament.pollLast());
+                }
+
+                duel.setWinner(null);
+
+                duelsToAdd.add(duel);
+            }
+
+            for (int roundUsersCount = initialRoundSize / 2, i = 1;
+                 roundUsersCount > 0;
+                 roundUsersCount /= 2, i++)
+            {
+                logger.info("Round: " + i);
+                Round round = new Round();
+                round.setElimination(elimination);
+                round.setRoundNumber(i);
+
+                roundsToAdd.add(round);
+
+                for (int j = 0, n = 0; j < roundUsersCount; j++, n++)
+                {
+                    Duel duel = new Duel();
+                    duel.setRound(round);
+                    duel.setNumber(n);
+                    duel.setFirst(null);
+                    duel.setSecond(null);
+                    duel.setWinner(null);
+
+                    duelsToAdd.add(duel);
+                }
+            }
+            tournament.setElimination(elimination);
+            tournamentsToAdd.add(tournament);
+        }
+
+        if (!eliminationsToAdd.isEmpty())
+        {
+            eliminationRepository.saveAll(eliminationsToAdd);
+            roundRepository.saveAll(roundsToAdd);
+            duelRepository.saveAll(duelsToAdd);
+            tournamentRepository.saveAll(tournamentsToAdd);
+        }
+
+        logger.info("Tournament elimination calculation END.");
+    }
+
+    private static boolean isPowerOfTwo(int number)
+    {
+        return (number > 0) && ((number & (number - 1)) == 0);
+    }
+
+    public DuelDTO getDuelByUserAndTournament(User user, String tournamentName)
+    {
+        Elimination elimination = eliminationRepository.findByTournament(tournamentRepository.findByName(tournamentName));
+        if (elimination != null)
+        {
+            Duel any = elimination.getRounds()
+                    .stream()
+                    .flatMap(round -> round.getDuels().stream())
+                    .filter(Objects::nonNull)
+                    .filter(duel -> duel.getWinner() == null)
+                    .filter(duel -> user.equals(duel.getFirst()) || user.equals(duel.getSecond()))
+                    .findAny()
+                    .orElse(null);
+
+            return new DuelDTO(any);
+        }
+        return new DuelDTO(null);
+    }
+
+    public void saveWinnerOfDuel(String tournamentName, User user)
+    {
+        Elimination elimination = eliminationRepository.findByTournament(tournamentRepository.findByName(tournamentName));
+
+        if (elimination != null)
+        {
+            Duel any = elimination.getRounds()
+                    .stream()
+                    .flatMap(round -> round.getDuels().stream())
+                    .filter(Objects::nonNull)
+                    .filter(duel -> duel.getWinner() == null)
+                    .filter(duel -> user.equals(duel.getFirst()) || user.equals(duel.getSecond()))
+                    .findAny()
+                    .orElse(null);
+
+            if (any != null)
+            {
+                any.setWinner(user);
+                duelRepository.save(any);
+
+                Integer duelNumber = any.getNumber();
+                Integer roundNumber = any.getRound().getRoundNumber();
+
+                logger.info("DuelNo: " + duelNumber + " Round no: " + roundNumber + " Next: " + (int) (duelNumber / 2.0));
+
+                Optional<Round> any1 = elimination.getRounds().stream().filter(o -> o.getRoundNumber().equals(roundNumber + 1)).findAny();
+
+                if (any1.isPresent())
+                {
+                    Round round = any1.get();
+                    Optional<Duel> any2 = round.getDuels().stream().filter(o -> o.getNumber().equals((int) (duelNumber / 2.0))).findAny();
+
+                    if (any2.isPresent())
+                    {
+                        Duel duel = any2.get();
+                        if (duelNumber % 2 == 0)
+                        {
+                            duel.setFirst(user);
+                        }
+                        else
+                        {
+                            duel.setSecond(user);
+                        }
+
+                        duelRepository.save(duel);
+                    }
+                }
+            }
+        }
     }
 }

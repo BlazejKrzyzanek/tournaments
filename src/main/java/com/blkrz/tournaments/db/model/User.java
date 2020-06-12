@@ -34,6 +34,16 @@ public class User
     @NotNull
     private String role;
 
+    @OneToMany(mappedBy = "first", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private List<Duel> duelsAsFirst;
+    @OneToMany(mappedBy = "second", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private List<Duel> duelsAsSecond;
+    @OneToMany(mappedBy = "winner", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private List<Duel> duelsAsWinner;
+
     public User()
     {
     }

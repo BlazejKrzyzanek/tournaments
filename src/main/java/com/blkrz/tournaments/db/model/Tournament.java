@@ -1,6 +1,7 @@
 package com.blkrz.tournaments.db.model;
 
 import lombok.Data;
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ public class Tournament
     @GeneratedValue
     private Integer id;
     @NotNull
+    @NaturalId
     @Length(min = 3, max = 50)
     private String name;
     @NotNull
@@ -38,4 +40,6 @@ public class Tournament
     private LocalDateTime deadline;
     @ManyToMany
     private List<Sponsor> sponsors;
+    @OneToOne
+    private Elimination elimination;
 }

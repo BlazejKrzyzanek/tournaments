@@ -6,6 +6,7 @@ import com.blkrz.tournaments.data.dto.TournamentRegistrationDTO;
 import com.blkrz.tournaments.db.model.User;
 import com.blkrz.tournaments.exception.DisciplineDoesntExistException;
 import com.blkrz.tournaments.exception.SponsorDoesntExistException;
+import com.blkrz.tournaments.exception.TooManyUsersRegisteredToTournament;
 import com.blkrz.tournaments.exception.TournamentsFileException;
 import com.blkrz.tournaments.service.TournamentService;
 import com.blkrz.tournaments.service.UserService;
@@ -31,30 +32,23 @@ public class StartupDataLoader implements ApplicationRunner
         this.tournamentService = tournamentService;
     }
 
-    public void run(ApplicationArguments args) throws SponsorDoesntExistException, DisciplineDoesntExistException, TournamentsFileException
+    public void run(ApplicationArguments args) throws SponsorDoesntExistException, DisciplineDoesntExistException, TournamentsFileException, TooManyUsersRegisteredToTournament
     {
-        User user = new User("Franek", "Bolkowski", "asd@dsf.com", "12345");
-        user.setEnabled(true);
-
-        userService.saveUser(user);
-
-        user = new User("Janek", "Bolkowski", "test@a.com", "12345");
-        user.setEnabled(true);
-
-        userService.saveUser(user);
-
-        user = new User("Janek", "Bolkowski", "test@b.com", "12345");
-        user.setEnabled(true);
-
-        userService.saveUser(user);
-
         tournamentService.registerDiscipline(new DisciplineDTO("Basketball", "images/disciplines/basketball.png"));
         tournamentService.registerDiscipline(new DisciplineDTO("Boxing", "images/disciplines/boxing-gloves.png"));
         tournamentService.registerDiscipline(new DisciplineDTO("Bowling", "images/disciplines/bowling.png"));
         tournamentService.registerDiscipline(new DisciplineDTO("Archery", "images/disciplines/archery.png"));
 
-        tournamentService.registerSponsor(new SponsorDTO("CocaCola", "images/disciplines/basketball.png"));
-        tournamentService.registerSponsor(new SponsorDTO("Pepsi", "images/disciplines/basketball.png"));
+        tournamentService.registerSponsor(new SponsorDTO("CocaCola", "images/sponsors/coca-cola.png"));
+        tournamentService.registerSponsor(new SponsorDTO("Pepsi", "images/sponsors/pepsi.png"));
+        tournamentService.registerSponsor(new SponsorDTO("Instagram", "images/sponsors/instagram.png"));
+        tournamentService.registerSponsor(new SponsorDTO("Mini", "images/sponsors/mini.png"));
+        tournamentService.registerSponsor(new SponsorDTO("tvn", "images/sponsors/tvn.png"));
+
+        User user = new User("Franek", "Bolkowski", "asd@dsf.com", "12345");
+        user.setEnabled(true);
+
+        userService.saveUser(user);
 
         TournamentRegistrationDTO tournamentRegistrationDTO = new TournamentRegistrationDTO();
         tournamentRegistrationDTO.setName("Basketball NBA contest");
@@ -74,6 +68,7 @@ public class StartupDataLoader implements ApplicationRunner
         tournamentRegistrationDTO.setLongitude(17.054894);
         tournamentRegistrationDTO.setEntryLimit(2);
         tournamentRegistrationDTO.setDiscipline("Boxing");
+        tournamentRegistrationDTO.setSponsors(List.of("Instagram", "Mini", "tvn"));
         tournamentService.registerTournament(tournamentRegistrationDTO, user);
 
         tournamentRegistrationDTO.setName("It all depends on LUCK...");
@@ -86,7 +81,7 @@ public class StartupDataLoader implements ApplicationRunner
         tournamentService.registerTournament(tournamentRegistrationDTO, user);
 
         tournamentRegistrationDTO.setName("Roving marks");
-        tournamentRegistrationDTO.setDeadlineAsLocalDateTime(LocalDateTime.now().plusDays(2));
+        tournamentRegistrationDTO.setDeadlineAsLocalDateTime(LocalDateTime.now().plusSeconds(25));
         tournamentRegistrationDTO.setDescription("Maecenas quis pharetra leo. Vestibulum vehicula vulputate tortor vel finibus. Donec nec mauris ut tellus tempus molestie eget vitae justo. ");
         tournamentRegistrationDTO.setLatitude(-7.572652);
         tournamentRegistrationDTO.setLongitude(110.823447);
@@ -97,8 +92,22 @@ public class StartupDataLoader implements ApplicationRunner
 
         for (int i = 0; i < 15; i++)
         {
-            tournamentRegistrationDTO.setName("Roving marks" + i);
+            tournamentRegistrationDTO.setName("Tournament " + i);
+            tournamentRegistrationDTO.setDeadlineAsLocalDateTime(LocalDateTime.now().plusDays(2));
             tournamentService.registerTournament(tournamentRegistrationDTO, user);
+        }
+
+        for (int i = 0; i < 25; i++)
+        {
+            user = new User("Janek" + i, "Bolkowski" + i, "test" + i + "@mail.com", "12345");
+            user.setEnabled(true);
+
+            userService.saveUser(user);
+
+            if (i < 10)
+            {
+                tournamentService.registerUserToTournament(user, "Roving marks", "asd" + i, i);
+            }
         }
     }
 }
