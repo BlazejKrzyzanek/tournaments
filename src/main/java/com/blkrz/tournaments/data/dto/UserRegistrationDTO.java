@@ -12,22 +12,22 @@ import javax.validation.constraints.NotNull;
 @PasswordMatches
 public class UserRegistrationDTO implements DTOWithPassword
 {
-    @NotNull
-    @NotEmpty
+    @NotNull(message = "First name must not be empty.")
+    @NotEmpty(message = "First name must not be empty.")
     private String firstName;
 
-    @NotNull
-    @NotEmpty
+    @NotNull(message = "Last name must not be empty.")
+    @NotEmpty(message = "Last name must not be empty.")
     private String lastName;
 
-    @NotNull
-    @NotEmpty
+    @NotNull(message = "Password must not be empty.")
+    @NotEmpty(message = "Password must not be empty.")
     @Length(min=6, max=20)
     private String password;
     private String matchingPassword;
 
-    @Email
-    @NotNull
-    @NotEmpty
+    @Email(message = "Plase provide valid email.")
+    @NotNull(message = "Email must not be empty.")
+    @NotEmpty(message = "Email must not be empty.")
     private String email;
 }
