@@ -22,7 +22,7 @@ public class UserRegistrationDTO implements DTOWithPassword
 
     @NotNull(message = "Password must not be empty.")
     @NotEmpty(message = "Password must not be empty.")
-    @Length(min=6, max=20)
+    @Length(min=6, max=20, message = "Password length must be between 6 and 20.")
     private String password;
     private String matchingPassword;
 
